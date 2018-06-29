@@ -40,7 +40,7 @@ feat_dims = feat_dims; % stupid MATLAB transparency
 db_feats = zeros(size(db_feats,1), size(db_feats,2), size(db_feats,3), ...
   numel(db_chunk_inds), 'like', db_feats);
 for i=1:numel(db_chunk_inds)
-  dat = load(fullfile('feats', dbname, sprintf('%03d.mat', db_chunk_inds(i))));
+  dat = load(fullfile('feats', dbname, sprintf('fid300_%03d.mat', db_chunk_inds(i))));
   db_feats(:,:,:,i) = dat.db_feats;
 end
 im_f2i = feat_2_image(rfsIm);
