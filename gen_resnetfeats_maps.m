@@ -10,25 +10,29 @@ end
 
 trace_H = 300;
 trace_W = 300;
-aerial_ims = zeros(trace_H,trace_W,3,2194, 'single');
-map_ims = zeros(trace_H,trace_W,3,2194, 'single');
+aerial_ims = zeros(trace_H, trace_W, 3, 2194, 'single');
+map_ims = zeros(trace_H, trace_W, 3, 2194, 'single');
 for i=1:1096
-  im = imresize(imread(sprintf('datasets/maps/train/%d.jpg', i)), imscale);
-  aerial_ims(:,:,:,i) = im(:, 1:width/2, :);
-  map_ims(:,:,:,i)    = im(:, width/2+1:end, :);
+  im = imresize(imread(fullfile('datasets', 'maps', 'train', ...
+                                sprintf('%d.jpg', i))), ...
+                imscale);
+  aerial_ims(:,:,:, i) = im(:, 1:width/2, :);
+  map_ims(:,:,:, i)    = im(:, width/2+1:end, :);
 end
 for i=1:1098
-  im = imresize(imread(sprintf('datasets/maps/val/%d.jpg', i)), imscale);
-  aerial_ims(:,:,:,1096+i) = im(:, 1:width/2, :);
-  map_ims(:,:,:,1096+i)    = im(:, width/2+1:end, :);
+  im = imresize(imread(fullfile('datasets', 'maps', 'val', ...
+                                sprintf('%d.jpg', i))), ...
+                imscale);
+  aerial_ims(:,:,:, 1096+i) = im(:, 1:width/2, :);
+  map_ims(:,:,:, 1096+i)    = im(:, width/2+1:end, :);
 end
 
 % zero-center the data
 mean_im = mean(aerial_ims, 4);
-mean_im_pix = mean(mean(mean_im,1),2);
+mean_im_pix = mean(mean(mean_im, 1), 2);
 aerial_ims = bsxfun(@minus, aerial_ims, mean_im_pix);
 mean_im = mean(map_ims, 4);
-mean_im_pix = mean(mean(mean_im,1),2);
+mean_im_pix = mean(mean(mean_im, 1), 2);
 map_ims = bsxfun(@minus, map_ims, mean_im_pix);
 
 
@@ -44,7 +48,7 @@ if db_ind==0
                                       'pad', 0, ...
                                       'hasBias', false), ...
                {'data'}, {'raw'}, {'I'});
-  net.params(1).value = reshape(single([1 0 0]), 1,1,3,1);
+  net.params(1).value = reshape(single([1 0 0]), 1, 1, 3, 1);
 end
 
 for c=1:numel(db_chunks)
@@ -52,10 +56,10 @@ for c=1:numel(db_chunks)
   data = {'data', aerial_ims(:,:,:, db_chunks{c})};
   all_db_feats = generate_db_CNNfeats(net, data);
 
-  for i=1:size(all_db_feats,4)
-    db_feats = all_db_feats(:,:,:,i);
-    save(sprintf('feats/%s/aerial_%04d.mat', dbname, db_chunks{c}(i)), ...
-      'db_feats', '-v7.3');
+  for i=1:size(all_db_feats, 4)
+    db_feats = all_db_feats(:,:,:, i);
+    save(fullfile('feats', dbname, sprintf('aerial_%04d.mat', db_chunks{c}(i))), ...
+         'db_feats', '-v7.3');
   end
   clear all_db_feats
 
@@ -63,10 +67,11 @@ for c=1:numel(db_chunks)
   data = {'data', map_ims(:,:,:, db_chunks{c})};
   all_db_feats = generate_db_CNNfeats(net, data);
 
-  for i=1:size(all_db_feats,4)
-    db_feats = all_db_feats(:,:,:,i);
-    save(sprintf('feats/%s/map_%04d.mat', dbname, db_chunks{c}(i)), ...
-      'db_feats', '-v7.3');
+  for i=1:size(all_db_feats, 4)
+    db_feats = all_db_feats(:,:,:, i);
+    save(fullfile('feats', dbname, sprintf('map_%04d.mat', db_chunks{c}(i))), ...
+         'db_feats', '-v7.3');
   end
   clear all_db_feats
+end
 end

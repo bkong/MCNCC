@@ -10,13 +10,13 @@ end
 
 trace_H = 128;
 trace_W = 128;
-facade_ims = zeros(trace_H,trace_W,3,606*3, 'single');
-label_ims = zeros(trace_H,trace_W,1,606*3, 'single');
+facade_ims = zeros(trace_H, trace_W, 3, 606*3, 'single');
+label_ims = zeros(trace_H, trace_W, 1, 606*3, 'single');
 files = dir('datasets/facades/*.png');
 for f=1:numel(files)
   [~, name, ~] = fileparts(files(f).name);
-  facade = imread(sprintf('facades/%s.jpg', name));
-  label = imread(sprintf('facades/%s.png', name));
+  facade = imread(fullfile('facades', sprintf('%s.jpg', name)));
+  label = imread(fullfile('facades', sprintf('%s.png', name)));
 
   [height, width, ~] = size(facade);
   if height<width
@@ -58,7 +58,7 @@ label_ims(:,:,:, inds) = [];
 test = single(reshape(label_ims, 128*128, [])');
 test = bsxfun(@minus, test, mean(test));
 test = bsxfun(@rdivide, test, sqrt(sum(test.*test, 2)));
-test_corr = test*test' + diag(NaN(size(label_ims,4),1));
+test_corr = test*test' + diag(NaN(size(label_ims,4), 1));
 inds = find(test_corr(:)>=0.99);
 [rows,cols] = ind2sub(size(test_corr), inds);
 inds = [];
@@ -72,20 +72,20 @@ facade_ims(:,:,:, inds) = [];
 label_ims(:,:,:, inds) = [];
 
 % expand the entire dynamic range
-color_labels = zeros(size(label_ims,1), size(label_ims,2), 3, size(label_ims,4), 'uint8');
+color_labels = zeros(size(label_ims, 1), size(label_ims, 2), 3, size(label_ims, 4), 'uint8');
 for i=1:size(label_ims,4)
-  label = label_ims(:,:,:,i);
-  color_labels(:,:,:,i) = im2uint8(reshape(cmap(label(:), :), [size(label,1), size(label,2), 3]));
+  label = label_ims(:,:,:, i);
+  color_labels(:,:,:, i) = im2uint8(reshape(cmap(label(:), :), [size(label, 1), size(label, 2), 3]));
 end
 label_ims = color_labels;
 clear color_labels
 
 % zero-center the data
 mean_im = mean(facade_ims, 4);
-mean_im_pix = mean(mean(mean_im,1),2);
+mean_im_pix = mean(mean(mean_im,1), 2);
 facade_ims = bsxfun(@minus, facade_ims, mean_im_pix);
 mean_im = mean(label_ims, 4);
-mean_im_pix = mean(mean(mean_im,1),2);
+mean_im_pix = mean(mean(mean_im,1), 2);
 label_ims = bsxfun(@minus, label_ims, mean_im_pix);
 
 
@@ -101,7 +101,7 @@ if db_ind==0
                                       'pad', 0, ...
                                       'hasBias', false), ...
                {'data'}, {'raw'}, {'I'});
-  net.params(1).value = reshape(single([1 0 0]), 1,1,3,1);
+  net.params(1).value = reshape(single([1 0 0]), 1, 1, 3, 1);
 end
 
 for c=1:numel(db_chunks)
@@ -109,10 +109,10 @@ for c=1:numel(db_chunks)
   data = {'data', facade_ims(:,:,:, db_chunks{c})};
   all_db_feats = generate_db_CNNfeats(net, data);
 
-  for i=1:size(all_db_feats,4)
-    db_feats = all_db_feats(:,:,:,i);
-    save(sprintf('feats/%s/facade_%04d.mat', dbname, db_chunks{c}(i)), ...
-      'db_feats', '-v7.3');
+  for i=1:size(all_db_feats, 4)
+    db_feats = all_db_feats(:,:,:, i);
+    save(fullfile('feats', dbname, sprintf('facade_%04d.mat', db_chunks{c}(i))), ...
+         'db_feats', '-v7.3');
   end
   clear all_db_feats
 
@@ -120,10 +120,11 @@ for c=1:numel(db_chunks)
   data = {'data', label_ims(:,:,:, db_chunks{c})};
   all_db_feats = generate_db_CNNfeats(net, data);
 
-  for i=1:size(all_db_feats,4)
-    db_feats = all_db_feats(:,:,:,i);
-    save(sprintf('feats/%s/label_%04d.mat', dbname, db_chunks{c}(i)), ...
-      'db_feats', '-v7.3');
+  for i=1:size(all_db_feats, 4)
+    db_feats = all_db_feats(:,:,:, i);
+    save(fullfile('feats', dbname, sprintf('label_%04d.mat', db_chunks{c}(i))), ...
+         'db_feats', '-v7.3');
   end
   clear all_db_feats
+end
 end
