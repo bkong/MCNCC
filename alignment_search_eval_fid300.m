@@ -56,7 +56,7 @@ ones_w = gpuArray.ones(1,1,256, 'single');
 
 db_feats = gpuArray(db_feats);
 for p=reshape(p_inds, 1, [])
-  fname = fullfile('results', dbname, sprintf('alignment_search_ones_res_%04d.mat', p));
+  fname = fullfile('results', dbname, sprintf('fid300_alignment_search_ones_res_%04d.mat', p));
   if exist(fname, 'file'), continue, end
   lock_fname = [fname,'.lock'];
   if exist(lock_fname, 'file'), continue, end
