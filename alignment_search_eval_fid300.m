@@ -27,7 +27,7 @@ if db_ind==0
                {'data'}, {'raw'}, {'I'});
   net.params(1).value = reshape(single([1 0 0]), 1,1,3,1);
 end
-load('results/latent_ims_mean_pix.mat', 'mean_im_pix')
+load(fullfile('results', 'latent_ims_mean_pix.mat'), 'mean_im_pix')
 mean_im_pix = mean_im_pix; % stupid MATLAB transparency
 
 
@@ -50,7 +50,7 @@ se = strel('disk', radius, 0);
 
 
 
-ones_w = gpuArray.ones(1,1,256, 'single');
+ones_w = gpuArray.ones(1, 1, feat_dims(3), 'single');
 
 
 
@@ -152,9 +152,9 @@ for p=reshape(p_inds, 1, [])
   locaONES = bsxfun(@eq, scores_ones, minsONES);
 
   % save results
-  save_result(fname, struct('scores_ones', scores_ones, ...
-                            'minsONES', minsONES, ...
-                            'locaONES', locaONES));
+  save_results(fname, struct('scores_ones', scores_ones, ...
+                             'minsONES', minsONES, ...
+                             'locaONES', locaONES));
   % remove lockfile
   fclose(fid);
   delete(lock_fname);
