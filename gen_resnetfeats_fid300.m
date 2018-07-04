@@ -83,7 +83,7 @@ end
 
 
 % load and modify network
-flatnn = load('models/imagenet-resnet-50-dag.mat');
+flatnn = load(fullfile('models', 'imagenet-resnet-50-dag.mat'));
 net = dagnn.DagNN();
 net = net.loadobj(flatnn);
 ind = net.getLayerIndex(db_attr{2});

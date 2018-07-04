@@ -90,7 +90,7 @@ label_ims = bsxfun(@minus, label_ims, mean_im_pix);
 
 
 % load and modify network
-flatnn = load('imagenet-resnet-50-dag.mat');
+flatnn = load(fullfile('models', 'imagenet-resnet-50-dag.mat'));
 net = dagnn.DagNN();
 net = net.loadobj(flatnn);
 ind = net.getLayerIndex(db_attr{2});
