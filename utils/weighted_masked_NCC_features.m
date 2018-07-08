@@ -11,7 +11,8 @@ function all_scores = weighted_masked_NCC_features(db, tpl, mask, w_cell)
     inds = (b-1)*batchSize+1:min((b-1)*batchSize+batchSize, N);
     feats = masked_NCC_features(db(:,:,:,inds), tpl, mask);
     for m=1:numel(w_cell)
-      all_scores{m}(1,1,1,inds) = gather(sum(sum( vl_nnconv(feats, w_cell{m}, []), 1),2));
+      all_scores{m}(1,1,1,inds) = ...
+        gather(sum(sum( vl_nnconv(feats, w_cell{m}, []), 1),2))./size(feats, 3);
     end
   end
 end
