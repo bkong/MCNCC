@@ -77,13 +77,13 @@ for p=reshape(p_inds, 1, [])
     end
   end
   p_im = bsxfun(@minus, single(p_im), mean_im_pix);
-  [p_H,p_W,p_C] = size(p_im);
+  [p_H, p_W, p_C] = size(p_im);
 
   % pad latent print so that for every pixel location (of the original latent print)
   % we can extract an image of the same size as the test impressions
   pad_H = trace_H-p_H; pad_W = trace_W-p_W;
   p_im_padded = padarray(p_im, [pad_H pad_W], 255, 'both');
-  p_mask_padded = padarray(logical(ones(p_H, p_W, 'uint8')), [pad_H pad_W], 0, 'both');
+  p_mask_padded = padarray(ones(p_H, p_W, 'logical'), [pad_H pad_W], 0, 'both');
 
   cnt = 0;
   eraseStr = '';
@@ -110,11 +110,11 @@ for p=reshape(p_inds, 1, [])
       offsets_x = [0 2];
     end
     for offsetx=offsets_x, for offsety=offsets_y
-      p_r_feat = generate_db_CNNfeats_gpu(net, {'data', p_im_padded_r(offsety+1:end,offsetx+1:end,:)});
+      p_r_feat = generate_db_CNNfeats_gpu(net, {'data', p_im_padded_r(offsety+1:end, offsetx+1:end, :)});
 
       % shifting by 1 in the feature space = shifting by 4px in the image space
-      for j=1:size(p_r_feat,2)-feat_dims(2)+1
-      for i=1:size(p_r_feat,1)-feat_dims(1)+1
+      for j=1:size(p_r_feat, 2)-feat_dims(2)+1
+      for i=1:size(p_r_feat, 1)-feat_dims(1)+1
         msg = sprintf('%d/%d ', cnt, numel(angles)*ceil(pad_H/2+0.5)*ceil(pad_W/2+0.5));
         if mod(cnt, 10)==0
           fprintf([eraseStr, msg]);
@@ -124,8 +124,8 @@ for p=reshape(p_inds, 1, [])
 
         pix_i = offsety+(i-1)*4+1; pix_j = offsetx+(j-1)*4+1;
         % skip features outside the image
-        if pix_i+trace_H-1>size(p_mask_padded_r,1) || ...
-           pix_j+trace_W-1>size(p_mask_padded_r,2),
+        if pix_i+trace_H-1>size(p_mask_padded_r, 1) || ...
+           pix_j+trace_W-1>size(p_mask_padded_r, 2),
           continue
         end
 
