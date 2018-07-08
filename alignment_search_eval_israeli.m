@@ -1,4 +1,4 @@
-function alignment_search_eval_israeli(p_inds, db_ind)
+function alignment_search_eval_israeli(p_inds, db_ind, use_mask)
 % seems faster to run database against latent prints, potentially fewer
 % translations to look over (especially when latent prints are MUCH smaller than
 % test impressions)
@@ -6,6 +6,9 @@ erode_pct = 0.1;
 
 if nargin<2
   db_ind = 2;
+end
+if nargin<3
+  use_mask = true;
 end
 
 
@@ -65,7 +68,11 @@ end
 db_feats = gpuArray(db_feats);
 mkdir(fullfile('results', dbname))
 for p=reshape(p_inds, 1, [])
-  fname = fullfile('results', dbname, sprintf('israeli_alignment_search_ones_res_%04d.mat', p));
+  if use_mask
+    fname = fullfile('results', dbname, sprintf('israeli_alignment_search_ones_res_%04d.mat', p));
+  else
+    fname = fullfile('results', dbname, sprintf('israeli_alignment_search_nomask_ones_res_%04d.mat', p));
+  end
   if exist(fname, 'file'), continue, end
   lock_fname = [fname,'.lock'];
   if exist(lock_fname, 'file'), continue, end
@@ -79,7 +86,9 @@ for p=reshape(p_inds, 1, [])
   % we can extract an image of the same size as the test impressions
   pad_H = trace_H-p_H; pad_W = trace_W-p_W;
   p_im_padded = gpuArray(padarray(p_im, [pad_H pad_W], 255, 'both'));
-  p_mask_padded = padarray(ones(p_H, p_W, 'logical'), [pad_H pad_W], 0, 'both');
+  if use_mask
+    p_mask_padded = padarray(ones(p_H, p_W, 'logical'), [pad_H pad_W], 0, 'both');
+  end
 
   cnt = 0;
   eraseStr = '';
@@ -93,7 +102,9 @@ for p=reshape(p_inds, 1, [])
   for r=1:numel(angles)
     % rotate image and mask
     p_im_padded_r = imrotate(p_im_padded, angles(r), 'bicubic', 'crop');
-    p_mask_padded_r = imrotate(p_mask_padded, angles(r), 'nearest', 'crop');
+    if use_mask
+      p_mask_padded_r = imrotate(p_mask_padded, angles(r), 'nearest', 'crop');
+    end
 
     % NOTE: this works for res2bx (db_ind=2),
     % need to double-check when using other ResNet features
@@ -121,19 +132,23 @@ for p=reshape(p_inds, 1, [])
 
         pix_i = offsety+(i-1)*4+1; pix_j = offsetx+(j-1)*4+1;
         % skip features outside the image
-        if pix_i+trace_H-1>size(p_mask_padded_r,1) || ...
-           pix_j+trace_W-1>size(p_mask_padded_r,2),
+        if pix_i+trace_H-1>size(p_im_padded_r, 1) || ...
+           pix_j+trace_W-1>size(p_im_padded_r, 2),
           continue
         end
 
         p_ijr_feat = p_r_feat(i:i+feat_dims(1)-1, j:j+feat_dims(2)-1, :);
-        % just compute the wrapped mask everytime to simplify code logic
-        p_mask_ijr = p_mask_padded_r(pix_i:pix_i+trace_H-1, pix_j:pix_j+trace_W-1);
-        p_ijr_feat_mask = warp_masks(p_mask_ijr, im_f2i, feat_dims, db_ind);
-        % erode masks
-        p_ijr_feat_mask = padarray(p_ijr_feat_mask, [radius radius], 0);
-        p_ijr_feat_mask = imerode(p_ijr_feat_mask, se, 'same');
-        p_ijr_feat_mask = p_ijr_feat_mask(radius+1:end-radius, radius+1:end-radius, :,:);
+        if use_mask
+          % just compute the wrapped mask everytime to simplify code logic
+          p_mask_ijr = p_mask_padded_r(pix_i:pix_i+trace_H-1, pix_j:pix_j+trace_W-1);
+          p_ijr_feat_mask = warp_masks(p_mask_ijr, im_f2i, feat_dims, db_ind);
+          % erode masks
+          p_ijr_feat_mask = padarray(p_ijr_feat_mask, [radius radius], 0);
+          p_ijr_feat_mask = imerode(p_ijr_feat_mask, se, 'same');
+          p_ijr_feat_mask = p_ijr_feat_mask(radius+1:end-radius, radius+1:end-radius, :,:);
+        else
+          p_ijr_feat_mask = ones(feat_dims(1), feat_dims(2), 1, 'logical');
+        end
 
         % find the argmax score of database entries
         scores_cell = weighted_masked_NCC_features(db_feats, p_ijr_feat, p_ijr_feat_mask, ...
