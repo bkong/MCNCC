@@ -41,26 +41,14 @@ feat_idx = numel(net.vars);
 feat_dims = size(net.vars(end).value);
 rfs = net.getVarReceptiveFields(1);
 rfsIm = rfs(end);
-if db_attr{3}>1
-  net.addLayer('pooling', dagnn.Pooling('method', 'avg', ...
-                                        'poolSize', db_attr{3}, ...
-                                        'stride', db_attr{4}, ...
-                                        'pad', db_attr{5}), ...
-               {net.vars(end).name}, {'pooling_out'});
-  net.move('gpu')
-  net.eval({'data', gpuArray.zeros(trace_H, trace_W, 3, 'single')});
-end
-dist_dims = size(net.vars(end).value);
-rfs = net.getVarReceptiveFields(feat_idx);
-rfsDB = rfs(end);
 
 
 mkdir(fullfile('feats', dbname))
 db_feats = all_db_feats(:,:,:, 1);
 db_labels = all_db_labels(:,:,:, 1);
 save(fullfile('feats', dbname, 'israeli_001.mat'), ...
-  'db_feats', 'db_labels', 'feat_dims', 'dist_dims', ...
-  'rfsIm', 'rfsDB', 'trace_H', 'trace_W', '-v7.3')
+  'db_feats', 'db_labels', 'feat_dims', ...
+  'rfsIm', 'trace_H', 'trace_W', '-v7.3')
 for i=2:size(all_db_feats, 4)
   db_feats = all_db_feats(:,:,:, i);
   db_labels = all_db_labels(:,:,:, i);

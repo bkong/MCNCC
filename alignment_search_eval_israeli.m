@@ -37,7 +37,7 @@ mean_im_pix = gpuArray(mean_im_pix);
 % build database chunk
 db_chunk_inds = db_chunks{1};
 load(fullfile('feats', dbname, 'israeli_001.mat'), ...
-  'db_feats', 'feat_dims', 'rfsIm', 'rfsDB', 'trace_H', 'trace_W')
+  'db_feats', 'feat_dims', 'rfsIm', 'trace_H', 'trace_W')
 feat_dims = feat_dims; % stupid MATLAB transparency
 db_feats = zeros(size(db_feats,1), size(db_feats,2), size(db_feats,3), ...
   numel(db_chunk_inds), 'like', db_feats);
