@@ -9,7 +9,7 @@ end
 
 trace_H = 586;
 trace_W = 270;
-ims = zeros(trace_H,trace_W,1,1175, 'single');
+ims = zeros(trace_H, trace_W, 1, 1175, 'single');
 for i=1:1175
   im = imresize(imread(fullfile('datasets', ...
                                 'FID-300', ...
@@ -17,7 +17,7 @@ for i=1:1175
                                 sprintf('%05d.png', i))), ...
                 imscale);
   % only 4 shoes are 1 pixel taller (height=587)
-  im = im(1:586,:);
+  im = im(1:586, :);
 
   % manually flip left shoe
   if any(ismember([107 525], i))
@@ -25,18 +25,18 @@ for i=1:1175
   end
 
   % pad to max width
-  w = size(im,2);
+  w = size(im, 2);
   im = padarray(im, [0 floor((270-w)/2)], 255, 'pre');
   im = padarray(im, [0 ceil((270-w)/2)], 255, 'post');
 
-  ims(:,:,1,i) = im;
+  ims(:,:, 1, i) = im;
 end
 
 % zero-center the data
 mean_im = mean(ims, 4);
-mean_im_pix = mean(mean(mean_im,1),2);
+mean_im_pix = mean(mean(mean_im, 1), 2);
 ims = bsxfun(@minus, ims, mean_im_pix);
-ims = repmat(ims, 1,1,3,1);
+ims = repmat(ims, 1, 1, 3, 1);
 
 
 groups = { ...
@@ -90,7 +90,7 @@ if db_ind==0
                                       'pad', 0, ...
                                       'hasBias', false), ...
                {'data'}, {'raw'}, {'I'});
-  net.params(1).value = reshape(single([1 0 0]), 1,1,3,1);
+  net.params(1).value = reshape(single([1 0 0]), 1, 1, 3, 1);
 else
   flatnn = load(fullfile('models', db_attr{3}));
   net = net.loadobj(flatnn);
@@ -103,7 +103,7 @@ end
 data = {net.vars(1).name, ims};
 all_db_feats = generate_db_CNNfeats(net, data);
 % generate labels for db
-all_db_labels = reshape(treadids, 1,1,1,[]);
+all_db_labels = reshape(treadids, 1, 1, 1, []);
 
 feat_idx = numel(net.vars);
 feat_dims = size(net.vars(end).value);
@@ -112,14 +112,14 @@ rfsIm = rfs(end);
 
 
 mkdir(fullfile('feats', dbname))
-db_feats = all_db_feats(:,:,:,1);
-db_labels = all_db_labels(:,:,:,1);
+db_feats = all_db_feats(:,:,:, 1);
+db_labels = all_db_labels(:,:,:, 1);
 save(fullfile('feats', dbname, 'fid300_001.mat'), ...
   'db_feats', 'db_labels', 'feat_dims', ...
   'rfsIm', 'trace_H', 'trace_W', '-v7.3')
-for i=2:size(all_db_feats,4)
-  db_feats = all_db_feats(:,:,:,i);
-  db_labels = all_db_labels(:,:,:,i);
+for i=2:size(all_db_feats, 4)
+  db_feats = all_db_feats(:,:,:, i);
+  db_labels = all_db_labels(:,:,:, i);
   save(fullfile('feats', dbname, sprintf('fid300_%03d.mat', i)), ...
     'db_feats', 'db_labels', '-v7.3');
 end

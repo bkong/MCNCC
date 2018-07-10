@@ -34,8 +34,8 @@ end
 cmcs = cmcs./numel(labels).*100;
 
 
-set(0,'DefaultAxesFontName', 'Times New Roman')
-set(0,'DefaultTextFontname', 'Times New Roman')
+set(0, 'DefaultAxesFontName', 'Times New Roman')
+set(0, 'DefaultTextFontname', 'Times New Roman')
 font_size = 48;
 line_width = 6;
 
@@ -57,6 +57,6 @@ lgd = legend('Cosine', 'Euclidean', ...
 lgd.Interpreter = 'latex';
 axis square
 set(gca, 'FontSize', font_size)
-set(findall(gcf,'type','text'), 'FontSize', font_size)
+set(findall(gcf, 'type', 'text'), 'FontSize', font_size)
 
 end

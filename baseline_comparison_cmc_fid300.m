@@ -23,7 +23,7 @@ for p=1:300
   query_label = label_table(p, 2);
 
   % NCC
-  [~,inds] = sort(minsONES(:)', 'descend');
+  [~, inds] = sort(minsONES(:)', 'descend');
   assert(numel(inds)==1175);
   ncc_cmc = ncc_cmc+cumsum(inds==query_label);
 end
@@ -46,8 +46,8 @@ for b=1:numel(baselines)
 end
 
 
-set(0,'DefaultAxesFontName', 'Times New Roman')
-set(0,'DefaultTextFontname', 'Times New Roman')
+set(0, 'DefaultAxesFontName', 'Times New Roman')
+set(0, 'DefaultTextFontname', 'Times New Roman')
 font_size = 48;
 line_width = 6;
 
@@ -72,7 +72,7 @@ lgd = legend('ACCV14', 'BMVC16', 'LoG16', ...
 lgd.Interpreter = 'latex';
 axis square
 set(gca, 'FontSize', font_size)
-set(findall(gcf,'type','text'), 'FontSize', font_size)
+set(findall(gcf, 'type', 'text'), 'FontSize', font_size)
 
 
 end

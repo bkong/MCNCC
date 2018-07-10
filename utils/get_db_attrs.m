@@ -26,13 +26,13 @@ switch db_ind
 end
 dbname = db_attr{1};
 
-if strcmpi(dataset,'israeli')
+if strcmpi(dataset, 'israeli')
   db_chunks = {1:387};
-elseif strcmpi(dataset,'fid300')
+elseif strcmpi(dataset, 'fid300')
   db_chunks = {1:1175};
-elseif strcmpi(dataset,'facades')
+elseif strcmpi(dataset, 'facades')
   db_chunks = {1:1657};
-elseif strcmpi(dataset,'maps')
+elseif strcmpi(dataset, 'maps')
   db_chunks = {1:1097, 1098:2194};
 else
   error(sprintf('Dataset: %s is not valid!\n', dataset))

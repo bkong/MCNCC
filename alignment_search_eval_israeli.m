@@ -40,11 +40,11 @@ db_chunk_inds = db_chunks{1};
 load(fullfile('feats', dbname, 'israeli_001.mat'), ...
   'db_feats', 'feat_dims', 'rfsIm', 'trace_H', 'trace_W')
 feat_dims = feat_dims; % stupid MATLAB transparency
-db_feats = zeros(size(db_feats,1), size(db_feats,2), size(db_feats,3), ...
+db_feats = zeros(size(db_feats, 1), size(db_feats, 2), size(db_feats, 3), ...
   numel(db_chunk_inds), 'like', db_feats);
 for i=1:numel(db_chunk_inds)
   dat = load(fullfile('feats', dbname, sprintf('israeli_%03d.mat', db_chunk_inds(i))));
-  db_feats(:,:,:,i) = dat.db_feats;
+  db_feats(:,:,:, i) = dat.db_feats;
 end
 im_f2i = feat_2_image(rfsIm);
 
@@ -75,13 +75,13 @@ for p=reshape(p_inds, 1, [])
     fname = fullfile('results', dbname, sprintf('israeli_alignment_search_nomask_ones_res_%04d.mat', p));
   end
   if exist(fname, 'file'), continue, end
-  lock_fname = [fname,'.lock'];
+  lock_fname = [fname, '.lock'];
   if exist(lock_fname, 'file'), continue, end
   fid = fopen(lock_fname, 'w');
   fprintf('p=%d: ', p),tic
 
   p_im = single(print_ims{p});
-  [p_H,p_W,p_C] = size(p_im);
+  [p_H, p_W, p_C] = size(p_im);
 
   % pad latent print so that for every pixel location (of the original latent print)
   % we can extract an image of the same size as the test impressions
@@ -99,7 +99,7 @@ for p=reshape(p_inds, 1, [])
   scores_ones = zeros(numel(transy), ...
                       numel(transx), ...
                       numel(angles), ...
-                      size(db_feats,4), 'single');
+                      size(db_feats, 4), 'single');
   for r=1:numel(angles)
     % rotate image and mask
     p_im_padded_r = imrotate(p_im_padded, angles(r), 'bicubic', 'crop');
@@ -119,17 +119,17 @@ for p=reshape(p_inds, 1, [])
     end
     for offsetx=offsets_x, for offsety=offsets_y
       p_r_feat = generate_db_CNNfeats_gpu(net, ...
-        {net.vars(1).name, bsxfun(@minus, p_im_padded_r(offsety+1:end,offsetx+1:end,:), mean_im_pix)});
+        {net.vars(1).name, bsxfun(@minus, p_im_padded_r(offsety+1:end, offsetx+1:end, :), mean_im_pix)});
 
       % shifting by 1 in the feature space = shifting by 4px in the image space
-      for j=1:size(p_r_feat,2)-feat_dims(2)+1
-      for i=1:size(p_r_feat,1)-feat_dims(1)+1
+      for j=1:size(p_r_feat, 2)-feat_dims(2)+1
+      for i=1:size(p_r_feat, 1)-feat_dims(1)+1
         msg = sprintf('%d/%d ', cnt, numel(angles)*ceil(pad_H/2+0.5)*ceil(pad_W/2+0.5));
         if mod(cnt, 10)==0
           fprintf([eraseStr, msg]);
           eraseStr = repmat(sprintf('\b'), 1, length(msg));
         end
-        fprintf(fid, [msg,'\n']);
+        fprintf(fid, [msg, '\n']);
 
         pix_i = offsety+(i-1)*4+1; pix_j = offsetx+(j-1)*4+1;
         % skip features outside the image
@@ -154,7 +154,7 @@ for p=reshape(p_inds, 1, [])
         % find the argmax score of database entries
         scores_cell = weighted_masked_NCC_features(db_feats, p_ijr_feat, p_ijr_feat_mask, ...
                                                    {ones_w});
-        scores_ones(pix_i/2+0.5,pix_j/2+0.5,r,:) = scores_cell{1};
+        scores_ones(pix_i/2+0.5, pix_j/2+0.5, r, :) = scores_cell{1};
         cnt = cnt+1;
       end
       end

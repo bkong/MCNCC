@@ -665,9 +665,9 @@ function [conv_rough_seg, shoe_pixels] = segment_trace(trace_im, thresh)
   trace_im = double(trace_im)./255;
   [traceH, traceW, traceC] = size(trace_im);
   lab_trace = rgb2lab(trace_im);
-  orange_dist = lab_dist(lab_trace, orange(:,:, 2),orange(:,:, 3));
+  orange_dist = lab_dist(lab_trace, orange(:,:, 2), orange(:,:, 3));
   red_dist    = lab_dist(lab_trace, red(:,:, 2), red(:,:, 3));
-  magenta_dist    = lab_dist(lab_trace, magenta(:,:, 2),magenta(:,:, 3));
+  magenta_dist    = lab_dist(lab_trace, magenta(:,:, 2), magenta(:,:, 3));
   shoe_pixels = ...
       orange_dist < orange_thresh & ...
       red_dist > red_thresh & ...

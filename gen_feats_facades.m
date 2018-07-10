@@ -58,9 +58,9 @@ label_ims(:,:,:, inds) = [];
 test = single(reshape(label_ims, 128*128, [])');
 test = bsxfun(@minus, test, mean(test));
 test = bsxfun(@rdivide, test, sqrt(sum(test.*test, 2)));
-test_corr = test*test' + diag(NaN(size(label_ims,4), 1));
+test_corr = test*test' + diag(NaN(size(label_ims, 4), 1));
 inds = find(test_corr(:)>=0.99);
-[rows,cols] = ind2sub(size(test_corr), inds);
+[rows, cols] = ind2sub(size(test_corr), inds);
 inds = [];
 for i=unique(cols)'
   if any(inds==i), continue, end
@@ -73,7 +73,7 @@ label_ims(:,:,:, inds) = [];
 
 % expand the entire dynamic range
 color_labels = zeros(size(label_ims, 1), size(label_ims, 2), 3, size(label_ims, 4), 'uint8');
-for i=1:size(label_ims,4)
+for i=1:size(label_ims, 4)
   label = label_ims(:,:,:, i);
   color_labels(:,:,:, i) = im2uint8(reshape(cmap(label(:), :), [size(label, 1), size(label, 2), 3]));
 end
@@ -82,10 +82,10 @@ clear color_labels
 
 % zero-center the data
 mean_im = mean(facade_ims, 4);
-mean_im_pix = mean(mean(mean_im,1), 2);
+mean_im_pix = mean(mean(mean_im, 1), 2);
 facade_ims = bsxfun(@minus, facade_ims, mean_im_pix);
 mean_im = mean(label_ims, 4);
-mean_im_pix = mean(mean(mean_im,1), 2);
+mean_im_pix = mean(mean(mean_im, 1), 2);
 label_ims = bsxfun(@minus, label_ims, mean_im_pix);
 
 
