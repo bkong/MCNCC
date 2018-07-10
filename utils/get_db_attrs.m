@@ -1,24 +1,28 @@
 function [db_attr,db_chunks,dbname] = get_db_attrs(dataset, db_ind, info)
 
 if nargin<4 || isempty(info)
-  info_inds = 1:2;
+  info_inds = 1:3;
 else
-  all_info = {'suffix', 'layer'};
+  all_info = {'suffix', 'layer', 'model'};
   info_inds = find(ismember(all_info, info));
 end
 
 % db_attr = {suffix, layer to cut network, pool size, pool stride, pool pad, img pad}
 switch db_ind
   case 0
-    db_attr = {'pixel_raw', 'conv1'};
+    db_attr = {'pixel_raw', 'conv1', ''};
   case 1
-    db_attr = {'resnet_db_2x',  'pool1'};
+    db_attr = {'resnet_2x',  'pool1', 'imagenet-resnet-50-dag.mat'};
   case 2
-    db_attr = {'resnet_db_4x', 'res2c_branch2a'};
+    db_attr = {'resnet_4x', 'res2c_branch2a', 'imagenet-resnet-50-dag.mat'};
   case 3
-    db_attr = {'resnet_db_8x', 'res3d_branch2a'};
+    db_attr = {'resnet_8x', 'res3d_branch2a', 'imagenet-resnet-50-dag.mat'};
   case 4
-    db_attr = {'resnet_db_16x', 'res4d_branch2a'};
+    db_attr = {'resnet_16x', 'res4d_branch2a', 'imagenet-resnet-50-dag.mat'};
+  case 5
+    db_attr = {'googlenet_4x', 'norm2', 'imagenet-googlenet-dag.mat'};
+  case 6
+    db_attr = {'vgg_4x', 'conv2', 'imagenet-vgg-m.mat'};
 end
 dbname = db_attr{1};
 

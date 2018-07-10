@@ -14,11 +14,7 @@ end
 
 
 % load and modify network
-flatnn = load(fullfile('models', 'imagenet-resnet-50-dag.mat'));
 net = dagnn.DagNN();
-net = net.loadobj(flatnn);
-ind = net.getLayerIndex(db_attr{2});
-net.layers(ind:end) = []; net.rebuild();
 if db_ind==0
   net.addLayer('identity', dagnn.Conv('size', [1 1 3 1], ...
                                       'stride', 1, ...
@@ -26,6 +22,11 @@ if db_ind==0
                                       'hasBias', false), ...
                {'data'}, {'raw'}, {'I'});
   net.params(1).value = reshape(single([1 0 0]), 1,1,3,1);
+else
+  flatnn = load(fullfile('models', db_attr{3}));
+  net = net.loadobj(flatnn);
+  ind = net.getLayerIndex(db_attr{2});
+  net.layers(ind:end) = []; net.rebuild();
 end
 load(fullfile('results', 'latent_ims_mean_pix.mat'), 'mean_im_pix')
 mean_im_pix = mean_im_pix; % stupid MATLAB transparency
@@ -110,7 +111,8 @@ for p=reshape(p_inds, 1, [])
       offsets_x = [0 2];
     end
     for offsetx=offsets_x, for offsety=offsets_y
-      p_r_feat = generate_db_CNNfeats_gpu(net, {'data', p_im_padded_r(offsety+1:end, offsetx+1:end, :)});
+      p_r_feat = generate_db_CNNfeats_gpu(net, ...
+        {net.vars(1).name, p_im_padded_r(offsety+1:end, offsetx+1:end, :)});
 
       % shifting by 1 in the feature space = shifting by 4px in the image space
       for j=1:size(p_r_feat, 2)-feat_dims(2)+1

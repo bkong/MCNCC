@@ -1,4 +1,4 @@
-function gen_resnetfeats_maps(db_ind)
+function gen_feats_maps(db_ind)
 imscale = 0.5;
 
 if nargin<1
@@ -37,11 +37,7 @@ map_ims = bsxfun(@minus, map_ims, mean_im_pix);
 
 
 % load and modify network
-flatnn = load(fullfile('models', 'imagenet-resnet-50-dag.mat'));
 net = dagnn.DagNN();
-net = net.loadobj(flatnn);
-ind = net.getLayerIndex(db_attr{2});
-net.layers(ind:end) = []; net.rebuild();
 if db_ind==0
   net.addLayer('identity', dagnn.Conv('size', [1 1 3 1], ...
                                       'stride', 1, ...
@@ -49,11 +45,16 @@ if db_ind==0
                                       'hasBias', false), ...
                {'data'}, {'raw'}, {'I'});
   net.params(1).value = reshape(single([1 0 0]), 1, 1, 3, 1);
+else
+  flatnn = load(fullfile('models', db_attr{3}));
+  net = net.loadobj(flatnn);
+  ind = net.getLayerIndex(db_attr{2});
+  net.layers(ind:end) = []; net.rebuild();
 end
 
 for c=1:numel(db_chunks)
   % generate features for aerial images
-  data = {'data', aerial_ims(:,:,:, db_chunks{c})};
+  data = {net.vars(1).name, aerial_ims(:,:,:, db_chunks{c})};
   all_db_feats = generate_db_CNNfeats(net, data);
 
   for i=1:size(all_db_feats, 4)
@@ -64,7 +65,7 @@ for c=1:numel(db_chunks)
   clear all_db_feats
 
   % generate features for map images
-  data = {'data', map_ims(:,:,:, db_chunks{c})};
+  data = {net.vars(1).name, map_ims(:,:,:, db_chunks{c})};
   all_db_feats = generate_db_CNNfeats(net, data);
 
   for i=1:size(all_db_feats, 4)

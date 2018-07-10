@@ -1,4 +1,4 @@
-function gen_resnetfeats_israeli(db_ind)
+function gen_feats_israeli(db_ind)
 if nargin<1
   db_ind = 2;
 end
@@ -16,11 +16,7 @@ trace_ims = bsxfun(@minus, trace_ims, mean_im_pix);
 
 
 % load and modify network
-flatnn = load(fullfile('models', 'imagenet-resnet-50-dag.mat'));
 net = dagnn.DagNN();
-net = net.loadobj(flatnn);
-ind = net.getLayerIndex(db_attr{2});
-net.layers(ind:end) = []; net.rebuild();
 if db_ind==0
   net.addLayer('identity', dagnn.Conv('size', [1 1 3 1], ...
                                       'stride', 1, ...
@@ -28,11 +24,16 @@ if db_ind==0
                                       'hasBias', false), ...
                {'data'}, {'raw'}, {'I'});
   net.params(1).value = reshape(single([1 0 0]), 1, 1, 3, 1);
+else
+  flatnn = load(fullfile('models', db_attr{3}));
+  net = net.loadobj(flatnn);
+  ind = net.getLayerIndex(db_attr{2});
+  net.layers(ind:end) = []; net.rebuild();
 end
 
 
 % generate database
-data = {'data', trace_ims};
+data = {net.vars(1).name, trace_ims};
 all_db_feats = generate_db_CNNfeats(net, data);
 % generate labels for db
 all_db_labels = reshape(trace_treadids, 1, 1, 1, []);
