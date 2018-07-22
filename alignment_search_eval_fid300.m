@@ -10,7 +10,7 @@ if nargin<2
 end
 
 
-[db_attr, db_chunks, dbname] = get_db_attrs('basel', db_ind);
+[db_attr, db_chunks, dbname] = get_db_attrs('fid300', db_ind);
 
 
 % load and modify network
