@@ -7,15 +7,11 @@ end
 
 [db_attr, ~, dbname] = get_db_attrs('fid300', db_ind);
 
-trace_H = 586;
-trace_W = 270;
-ims = zeros(trace_H, trace_W, 1, 1175, 'single');
 for i=1:1175
-  im = imresize(imread(fullfile('datasets', ...
-                                'FID-300', ...
-                                'references', ...
-                                sprintf('%05d.png', i))), ...
-                imscale);
+  im = imread(fullfile('datasets', ...
+                       'FID-300', ...
+                       'references', ...
+                       sprintf('%05d.png', i)));
   % only 4 shoes are 1 pixel taller (height=587)
   im = im(1:586, :);
 
@@ -29,6 +25,11 @@ for i=1:1175
   im = padarray(im, [0 floor((270-w)/2)], 255, 'pre');
   im = padarray(im, [0 ceil((270-w)/2)], 255, 'post');
 
+  im = imresize(im, imscale);
+  if i==1
+    [trace_H, trace_W] = size(im);
+    ims = zeros(trace_H, trace_W, 1, 1175, 'single');
+  end
   ims(:,:, 1, i) = im;
 end
 
